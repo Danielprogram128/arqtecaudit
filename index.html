@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arquitetura Técnica da Plataforma</title>
+  <style>
+    :root {
+      --bg: #0b1120;
+      --surface: #111827;
+      --surface-2: #182235;
+      --surface-3: #0f172a;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --line: #243041;
+      --accent: #ffffff;
+      --highlight: #cbd5e1;
+      --max: 1180px;
+      --radius: 18px;
+      --shadow: 0 12px 40px rgba(0,0,0,0.18);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      background: radial-gradient(circle at top, rgba(255,255,255,0.03), transparent 28%), var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(11,17,32,0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .topbar-inner {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-mark {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 6px rgba(255,255,255,0.06);
+    }
+
+    .brand-text {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      transition: 0.2s ease;
+    }
+
+    .nav a:hover { color: var(--accent); background: rgba(255,255,255,0.05); }
+
+    .container {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 34px 20px 90px;
+    }
+
+    .hero {
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0)), var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 46px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -80px;
+      top: -80px;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.08), transparent 65%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--highlight);
+      margin-bottom: 16px;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 28px;
+      height: 1px;
+      background: rgba(255,255,255,0.4);
+    }
+
+    h1 {
+      margin: 0 0 14px;
+      font-size: 40px;
+      line-height: 1.12;
+      letter-spacing: -0.03em;
+      color: var(--accent);
+      max-width: 840px;
+    }
+
+    .subtitle {
+      margin: 0;
+      font-size: 18px;
+      color: var(--muted);
+      max-width: 840px;
+    }
+
+    section {
+      margin-top: 20px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 34px;
+      box-shadow: var(--shadow);
+    }
+
+    .section-number {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--highlight);
+      margin-bottom: 8px;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 28px;
+      line-height: 1.2;
+      color: var(--accent);
+      letter-spacing: -0.02em;
+    }
+
+    p {
+      margin: 0 0 14px;
+      font-size: 16px;
+      color: var(--text);
+    }
+
+    .lead { color: var(--muted); font-size: 17px; }
+
+    .flowchart {
+      display: grid;
+      gap: 18px;
+      margin-top: 24px;
+      position: relative;
+    }
+
+    .stage {
+      position: relative;
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .stage:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      left: 68px;
+      top: calc(100% + 4px);
+      width: 2px;
+      height: 24px;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.25), rgba(255,255,255,0.05));
+    }
+
+    .stage-marker {
+      position: relative;
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0)), var(--surface-3);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px 14px;
+      text-align: center;
+      min-height: 100%;
+    }
+
+    .stage-marker .num {
+      width: 38px;
+      height: 38px;
+      margin: 0 auto 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .stage-marker .label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--highlight);
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .stage-content {
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0)), var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 22px;
+    }
+
+    .stage-content h3 {
+      margin: 0 0 10px;
+      font-size: 20px;
+      color: var(--accent);
+      letter-spacing: -0.01em;
+    }
+
+    .stage-content > p {
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0)), var(--surface-3);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+    }
+
+    .card h4 {
+      margin: 0 0 10px;
+      font-size: 15px;
+      color: var(--accent);
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    li { margin: 8px 0; }
+
+    .quote {
+      border-left: 4px solid rgba(255,255,255,0.9);
+      padding: 14px 0 14px 18px;
+      margin-top: 18px;
+      font-size: 18px;
+      line-height: 1.5;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .code-block {
+      background: #09101d;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px 20px;
+      overflow-x: auto;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 14px;
+      color: #d1d5db;
+      line-height: 1.7;
+      margin-top: 16px;
+      white-space: pre-wrap;
+    }
+
+    .closing {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 18px;
+      margin-top: 16px;
+    }
+
+    .panel {
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0)), var(--surface-3);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 20px;
+    }
+
+    .panel h3 { margin: 0 0 12px; color: var(--accent); }
+    .muted { color: var(--muted); }
+
+    @media (max-width: 980px) {
+      .grid-3, .grid, .closing { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 860px) {
+      .stage {
+        grid-template-columns: 1fr;
+      }
+      .stage:not(:last-child)::after {
+        left: 50%;
+        transform: translateX(-50%);
+        top: calc(100% + 4px);
+      }
+      .stage-marker {
+        text-align: left;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .stage-marker .num {
+        margin: 0;
+      }
+    }
+
+    @media (max-width: 800px) {
+      .hero, section { padding: 24px; }
+      h1 { font-size: 31px; }
+      h2 { font-size: 24px; }
+      .subtitle { font-size: 17px; }
+      .topbar-inner { align-items: flex-start; flex-direction: column; }
+      .nav { justify-content: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-mark"></div>
+        <div class="brand-text">Arquitetura Técnica</div>
+      </div>
+      <nav class="nav">
+        <a href="#fluxo">Fluxo</a>
+        <a href="#camadas">Camadas</a>
+        <a href="#modulos">Módulos</a>
+        <a href="#entidades">Entidades</a>
+        <a href="#evolucao">Evolução</a>
+        <a href="#perguntas">Perguntas</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div class="eyebrow">Plataforma de Auditoria Inteligente</div>
+      <h1>Arquitetura Técnica da Plataforma</h1>
+      <p class="subtitle">Estrutura técnica organizada como fluxo de projeto, preservando a visão de produto: entrada de dados, tratamento, motor de regras, score de risco, alertas e visualização.</p>
+    </section>
+
+    <section id="fluxo">
+      <div class="section-number">Fluxo principal do projeto</div>
+      <h2>Arquitetura apresentada como etapas conectadas</h2>
+      <p class="lead">A ideia aqui é enxergar a plataforma como um fluxo contínuo. Cada etapa resolve uma função específica e prepara a próxima, evitando acoplamento excessivo e facilitando evolução futura.</p>
+
+      <div class="flowchart">
+        <div class="stage">
+          <div class="stage-marker">
+            <div class="num">01</div>
+            <div class="label">Entrada<br>de Dados</div>
+          </div>
+          <div class="stage-content">
+            <h3>Coleta de dados</h3>
+            <p>Primeira camada da plataforma, responsável por receber dados de múltiplas fontes e transformá-los em entradas utilizáveis pelo sistema.</p>
+            <div class="grid">
+              <div class="card">
+                <h4>Fontes possíveis</h4>
+                <ul>
+                  <li>ERP</li>
+                  <li>sistema financeiro</li>
+                  <li>sistemas bancários</li>
+                  <li>planilhas</li>
+                  <li>formulários manuais</li>
+                  <li>APIs externas</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h4>Funções esperadas</h4>
+                <ul>
+                  <li>conectores</li>
+                  <li>importador Excel/CSV</li>
+                  <li>parser de OFX</li>
+                  <li>log de importação</li>
+                  <li>fila de entrada</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stage" id="camadas">
+          <div class="stage-marker">
+            <div class="num">02</div>
+            <div class="label">Tratamento<br>e Padrão</div>
+          </div>
+          <div class="stage-content">
+            <h3>Padronização e tratamento</h3>
+            <p>Etapa que limpa, valida e organiza os dados antes da análise. Sem isso, o motor de regras perde confiabilidade.</p>
+            <div class="grid">
+              <div class="card">
+                <h4>Tratamentos principais</h4>
+                <ul>
+                  <li>validar campos obrigatórios</li>
+                  <li>padronizar datas e moeda</li>
+                  <li>normalizar nomes</li>
+                  <li>tratar duplicidades</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h4>Resultado esperado</h4>
+                <ul>
+                  <li>base consistente</li>
+                  <li>dados comparáveis</li>
+                  <li>eventos prontos para auditoria</li>
+                </ul>
+              </div>
+            </div>
+            <div class="quote">O sistema precisa conseguir transformar dados imperfeitos em base auditável, sem depender de organização ideal por parte do cliente.</div>
+          </div>
+        </div>
+
+        <div class="stage">
+          <div class="stage-marker">
+            <div class="num">03</div>
+            <div class="label">Base<br>de Dados</div>
+          </div>
+          <div class="stage-content">
+            <h3>Armazenamento</h3>
+            <p>A arquitetura pode separar operação da plataforma e análise histórica, mesmo que isso comece de forma simplificada no MVP.</p>
+            <div class="grid">
+              <div class="card">
+                <h4>Banco transacional</h4>
+                <ul>
+                  <li>usuários</li>
+                  <li>empresas</li>
+                  <li>regras</li>
+                  <li>configurações</li>
+                  <li>alertas</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h4>Banco analítico</h4>
+                <ul>
+                  <li>eventos</li>
+                  <li>históricos</li>
+                  <li>séries temporais</li>
+                  <li>dados para score</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stage">
+          <div class="stage-marker">
+            <div class="num">04</div>
+            <div class="label">Motor<br>de Regras</div>
+          </div>
+          <div class="stage-content">
+            <h3>Execução das regras de auditoria</h3>
+            <p>Este é o núcleo lógico do produto. Aqui os dados tratados são comparados com as regras configuradas para gerar alertas e alimentar o score de risco.</p>
+            <div class="grid">
+              <div class="card">
+                <h4>Características esperadas</h4>
+                <ul>
+                  <li>modular</li>
+                  <li>parametrizável</li>
+                  <li>versionável</li>
+                  <li>ativação por cliente</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h4>Estrutura lógica de regra</h4>
+                <ul>
+                  <li>id</li>
+                  <li>nome</li>
+                  <li>descrição</li>
+                  <li>condição</li>
+                  <li>severidade</li>
+                  <li>parâmetros</li>
+                </ul>
+              </div>
+            </div>
+            <div class="code-block">evento → regra aplicável → condição satisfeita → alerta gerado</div>
+          </div>
+        </div>
+
+        <div class="stage">
+          <div class="stage-marker">
+            <div class="num">05</div>
+            <div class="label">Score de<br>Risco</div>
+          </div>
+          <div class="stage-content">
+            <h3>Consolidação de risco</h3>
+            <p>Depois que as regras disparam, o sistema transforma múltiplos alertas em uma leitura gerencial mais simples: score consolidado de risco.</p>
+            <div class="grid">
+              <div class="card">
+                <h4>Variáveis possíveis</h4>
+                <ul>
+                  <li>severidade</li>
+                  <li>recorrência</li>
+                  <li>impacto financeiro</li>
+                  <li>histórico</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h4>Saídas esperadas</h4>
+                <ul>
+                  <li>score por empresa</li>
+                  <li>score por usuário</li>
+                  <li>score por fornecedor</li>
+                  <li>score por processo</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stage">
+          <div class="stage-marker">
+            <div class="num">06</div>
+            <div class="label">Alertas e<br>Tratativa</div>
+          </div>
+          <div class="stage-content">
+            <h3>Gestão de alertas</h3>
+            <p>Nem todo disparo deve virar barulho. Essa camada organiza prioridade, agrupa ocorrências parecidas e permite tratamento pelos usuários.</p>
+            <div class="grid">
+              <div class="card">
+                <h4>Funções da camada</h4>
+                <ul>
+                  <li>priorização</li>
+                  <li>deduplicação</li>
+                  <li>status do alerta</li>
+                  <li>histórico de tratativa</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h4>Status possíveis</h4>
+                <ul>
+                  <li>aberto</li>
+                  <li>em análise</li>
+                  <li>confirmado</li>
+                  <li>falso positivo</li>
+                  <li>resolvido</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stage">
+          <div class="stage-marker">
+            <div class="num">07</div>
+            <div class="label">Dashboard<br>e Relatórios</div>
+          </div>
+          <div class="stage-content">
+            <h3>Visualização e tomada de decisão</h3>
+            <p>Camada visível para o cliente, onde os dados já chegam organizados em visão executiva e operacional.</p>
+            <div class="grid">
+              <div class="card">
+                <h4>Dashboard</h4>
+                <ul>
+                  <li>score geral</li>
+                  <li>alertas críticos</li>
+                  <li>tendência de risco</li>
+                  <li>principais regras disparadas</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h4>Relatórios</h4>
+                <ul>
+                  <li>executivo</li>
+                  <li>operacional</li>
+                  <li>por fornecedor</li>
+                  <li>por usuário</li>
+                  <li>por período</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stage">
+          <div class="stage-marker">
+            <div class="num">08</div>
+            <div class="label">Configuração<br>por Cliente</div>
+          </div>
+          <div class="stage-content">
+            <h3>Configuração sem customização excessiva</h3>
+            <p>Essa etapa é essencial para manter o produto escalável sem virar software sob medida. A base é padrão, mas com parâmetros ajustáveis conforme a operação do cliente.</p>
+            <div class="grid">
+              <div class="card">
+                <h4>Configurável</h4>
+                <ul>
+                  <li>regras ativas</li>
+                  <li>limites e tolerâncias</li>
+                  <li>horários aceitáveis</li>
+                  <li>pesos do score</li>
+                  <li>áreas monitoradas</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h4>Padrão do produto</h4>
+                <ul>
+                  <li>núcleo do motor</li>
+                  <li>estrutura dos dados</li>
+                  <li>tipo de alertas</li>
+                  <li>lógica do score</li>
+                </ul>
+              </div>
+            </div>
+            <div class="quote">A lógica certa não é fazer uma ferramenta diferente para cada cliente. É criar uma base forte que possa ser configurada sem perder identidade de produto.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="modulos">
+      <div class="section-number">Módulos do sistema</div>
+      <h2>Visão estrutural dos módulos principais</h2>
+      <div class="code-block">1. Auth e gestão de usuários
+2. Gestão de empresas / clientes
+3. Integrações e importação
+4. Tratamento e normalização de dados
+5. Motor de regras
+6. Motor de score
+7. Gestão de alertas
+8. Dashboard e relatórios
+9. Configuração por cliente
+10. Logs e auditoria interna da própria plataforma</div>
+    </section>
+
+    <section id="entidades">
+      <div class="section-number">Entidades centrais</div>
+      <h2>Objetos principais da plataforma</h2>
+      <div class="grid-3">
+        <div class="card"><h4>Empresa</h4><p>Cliente da plataforma.</p></div>
+        <div class="card"><h4>Usuário</h4><p>Perfis, acesso e responsabilidades.</p></div>
+        <div class="card"><h4>Fornecedor</h4><p>Cadastro externo auditável.</p></div>
+        <div class="card"><h4>Evento</h4><p>Registro central da atividade operacional.</p></div>
+        <div class="card"><h4>Regra</h4><p>Unidade lógica de auditoria.</p></div>
+        <div class="card"><h4>Alerta</h4><p>Resultado do disparo das regras.</p></div>
+        <div class="card"><h4>Score</h4><p>Consolidação de risco.</p></div>
+        <div class="card"><h4>Documento</h4><p>Notas, contratos e comprovantes.</p></div>
+        <div class="card"><h4>Configuração</h4><p>Parâmetros específicos de cada cliente.</p></div>
+      </div>
+    </section>
+
+    <section id="evolucao">
+      <div class="section-number">Fases do projeto</div>
+      <h2>Evolução planejada da arquitetura</h2>
+      <div class="flowchart">
+        <div class="stage">
+          <div class="stage-marker">
+            <div class="num">1</div>
+            <div class="label">MVP</div>
+          </div>
+          <div class="stage-content">
+            <h3>Base funcional</h3>
+            <p>Upload de dados, padronização, motor de regras, score básico, alertas e dashboard simples.</p>
+          </div>
+        </div>
+        <div class="stage">
+          <div class="stage-marker">
+            <div class="num">2</div>
+            <div class="label">Evolução</div>
+          </div>
+          <div class="stage-content">
+            <h3>Integração e refinamento</h3>
+            <p>Integrações automáticas, parâmetros por cliente, workflow de tratamento de alertas e histórico mais robusto.</p>
+          </div>
+        </div>
+        <div class="stage">
+          <div class="stage-marker">
+            <div class="num">3</div>
+            <div class="label">Maturidade</div>
+          </div>
+          <div class="stage-content">
+            <h3>Camada analítica avançada</h3>
+            <p>Análise comportamental mais profunda, modelos de anomalia, score inteligente e benchmark.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="perguntas">
+      <div class="section-number">Discussão técnica</div>
+      <h2>Perguntas para alinhar com o time técnico</h2>
+      <div class="closing">
+        <div class="panel">
+          <h3>Arquitetura e dados</h3>
+          <ul>
+            <li>Vale começar orientado a eventos ou em lote no MVP?</li>
+            <li>Faz sentido separar banco transacional e analítico desde cedo?</li>
+            <li>Como estruturar a trilha de auditoria da própria plataforma?</li>
+            <li>Onde está o maior risco técnico de escalabilidade?</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h3>Produto e regras</h3>
+          <ul>
+            <li>O motor já nasce parametrizável?</li>
+            <li>Vale separar regras globais e regras por cliente desde o início?</li>
+            <li>Até onde a configuração por cliente deve ir?</li>
+            <li>Como reduzir falso positivo sem perder sensibilidade?</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
